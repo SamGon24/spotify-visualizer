@@ -26,4 +26,23 @@ def _get_spotify_client():
 
     # justto check everything is working (dependencies)
 
+    load_dotenv() # Load environment variables from .env file
+
+    client_id = _require_env("SPOTIPY_CLIENT_ID")
+    client_secret = _require_env("SPOTIPY_CLIENT_SECRET")
+    redirect_uri = _require_env("SPOTIPY_REDIRECT_URI")
+    scopes = os.getenv("SPOTIFY_SCOPES", "user-read-email user-read-private")
+    
+    auth = SpotifyOAuth(
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
+        scope=scopes,
+        open_browser=True, # open the auth URL in the browser
+        cache_path=".cache") # cache the token in a file
+    
+    return spotipy.Spotify(auth_manager=auth)
+
+
+
 
