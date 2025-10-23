@@ -43,6 +43,24 @@ def _get_spotify_client():
     
     return spotipy.Spotify(auth_manager=auth)
 
+
+def get_recently_played(sp, limit: int = 10):
+    recent = sp.current_user_recently_played(limit=5)
+    tracks = []
+
+    for item in recent.get("items", []):
+        track = item.get("track", {})
+        artist_names = ", ".join([a.get("name") for a in track.get("artists", [])])
+        tracks.append({
+            "played_at": item.get("played_at"),
+            "name": track.get("name"),
+            "artist_name": artist_names, 
+            "album": (track.get("album") or {}).get("name"),
+            "track_name": track.get("name"),
+            })
+            
+        return tracks
+
 if __name__ == "__main__":
     print("[info] Starting Spotify client test...")
 
@@ -57,6 +75,9 @@ if __name__ == "__main__":
             "country": me.get("country"),
             "product": me.get("product")
         }, indent=2))
+
+        for track in get_recently_played(sp, limit=5):
+            print(f"- {track['track_name']} by {track['artist_name']}. Played at {track['played_at']})")
 
     except Exception as e:
         print(f"[error] {type(e).__name__}: {e}")
