@@ -43,6 +43,28 @@ def _get_spotify_client():
     
     return spotipy.Spotify(auth_manager=auth)
 
+if __name__ == "__main__":
+    print("[info] Starting Spotify client test...")
+
+    try:
+        sp = _get_spotify_client()  # autenticación + token
+        me = sp.current_user()      # llamada de prueba a la API
+
+        print("[ok] Authenticated successfully!\n")
+        print(json.dumps({
+            "display_name": me.get("display_name"),
+            "id": me.get("id"),
+            "country": me.get("country"),
+            "product": me.get("product")
+        }, indent=2))
+
+    except Exception as e:
+        print(f"[error] {type(e).__name__}: {e}")
+
+
+
+
+
 
 
 
