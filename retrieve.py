@@ -45,7 +45,7 @@ def _get_spotify_client():
 
 
 def get_recently_played(sp, limit: int = 10):
-    recent = sp.current_user_recently_played(limit=5)
+    recent = sp.current_user_recently_played(limit=20)
     tracks = []
 
     for item in recent.get("items", []):
@@ -59,7 +59,7 @@ def get_recently_played(sp, limit: int = 10):
             "track_name": track.get("name"),
             })
             
-        return tracks
+    return tracks
 
 if __name__ == "__main__":
     print("[info] Starting Spotify client test...")
@@ -77,7 +77,9 @@ if __name__ == "__main__":
         }, indent=2))
 
         for track in get_recently_played(sp, limit=5):
-            print(f"- {track['track_name']} by {track['artist_name']}. Played at {track['played_at']})")
+            x = 1
+            print(x, f"{track['track_name']} by {track['artist_name']}. Played at {track['played_at']})")
+            x = x + 1
 
     except Exception as e:
         print(f"[error] {type(e).__name__}: {e}")
