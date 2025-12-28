@@ -1,3 +1,4 @@
 /.env # Environment variables
 .cache/ # Cache files
 .token* # Token files
+.env
