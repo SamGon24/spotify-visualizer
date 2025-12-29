@@ -3,7 +3,10 @@ from app.services.spotify_client import get_spotify_client
 from app.services.spotify_data import (
     get_recently_played,
     get_top_tracks,
-    get_top_tracks_last_7_days,
+    get_top_tracks_last_7_days, get_top_artists, 
+    get_top_artists_last_7_days,
+    get_top_artists,
+    get_top_artists_last_7_days
 )
 
 api_bp = Blueprint("api", __name__)
@@ -130,3 +133,53 @@ def top_tracks(period: str):
         status=400,
         hint=["week", "month", "6months", "year"],
     )
+
+@api_bp.route("/top/artists/<period>")
+def top_artists(period: str):
+    sp = get_spotify_client()
+    period = period.lower().strip()
+    limit = 10
+
+    if period == "week":
+        data = get_top_artists_last_7_days(sp, limit=limit)
+        return api_ok(
+            data=data,
+            endpoint="/top/artists/week",
+            period="week",
+            limit=limit,
+        )
+
+    if period == "month":
+        data = get_top_artists(sp, time_range="short_term", limit=limit)
+        return api_ok(
+            data=data,
+            endpoint="/top/artists/month",
+            period="month",
+            limit=limit,
+        )
+
+    if period in {"6months", "6m", "halfyear"}:
+        canonical = "6months"
+        data = get_top_artists(sp, time_range="medium_term", limit=limit)
+        return api_ok(
+            data=data,
+            endpoint="/top/artists/6months",
+            period=canonical,
+            limit=limit,
+        )
+
+    if period == "year":
+        data = get_top_artists(sp, time_range="long_term", limit=limit)
+        return api_ok(
+            data=data,
+            endpoint="/top/artists/year",
+            period="year",
+            limit=limit,
+        )
+
+    return api_err(
+        "Invalid period. Use: week, month, 6months, year",
+        status=400,
+        hint=["week", "month", "6months", "year"],
+    )
+
