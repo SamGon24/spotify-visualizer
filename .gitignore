@@ -2,3 +2,15 @@
 .cache/ # Cache files
 .token* # Token files
 .env
+.venv
+.spotipy_cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+*.db
+*.bak
+*.tmp
+.DS_Store
