@@ -109,65 +109,33 @@ def user_info():
 
 @api_bp.route("/recent")
 def recent_tracks():
-    sp = get_spotify_client()
+    sp = get_sp_from_request()
+    if not sp:
+        return api_err("Missing or invalid token", status=401) # throws 401 if no token or invalid token provided
     limit = 10
-    tracks = get_recently_played(sp, limit=limit)
-
-    return api_ok(
-        data=tracks,
-        endpoint="/recent",
-        limit=limit,
-    )
+    tracks = get_recently_played(sp, limit=limit) 
+    return api_ok(data=tracks, endpoint="/recent", limit=limit)
 
 
 @api_bp.route("/top/tracks/<period>")
 def top_tracks(period: str):
-    sp = get_spotify_client()
+    sp = get_sp_from_request()
+    if not sp:
+        return api_err("Missing or invalid token", status=401)
+
     period = period.lower().strip()
     limit = 10
 
     if period == "week":
-        data = get_top_tracks_last_7_days(sp, limit=limit)
-        return api_ok(
-            data=data,
-            endpoint="/top/tracks/week",
-            period="week",
-            limit=limit,
-        )
-
+        return api_ok(data=get_top_tracks_last_7_days(sp, limit=limit), endpoint="/top/tracks/week", period="week", limit=limit)
     if period == "month":
-        data = get_top_tracks(sp, time_range="short_term", limit=limit)
-        return api_ok(
-            data=data,
-            endpoint="/top/tracks/month",
-            period="month",
-            limit=limit,
-        )
-
+        return api_ok(data=get_top_tracks(sp, time_range="short_term", limit=limit), endpoint="/top/tracks/month", period="month", limit=limit)
     if period in {"6months", "6m", "halfyear"}:
-        canonical = "6months"
-        data = get_top_tracks(sp, time_range="medium_term", limit=limit)
-        return api_ok(
-            data=data,
-            endpoint="/top/tracks/6months",
-            period=canonical,
-            limit=limit,
-        )
-
+        return api_ok(data=get_top_tracks(sp, time_range="medium_term", limit=limit), endpoint="/top/tracks/6months", period="6months", limit=limit)
     if period == "year":
-        data = get_top_tracks(sp, time_range="long_term", limit=limit)
-        return api_ok(
-            data=data,
-            endpoint="/top/tracks/year",
-            period="year",
-            limit=limit,
-        )
+        return api_ok(data=get_top_tracks(sp, time_range="long_term", limit=limit), endpoint="/top/tracks/year", period="year", limit=limit)
 
-    return api_err(
-        "Invalid period. Use: week, month, 6months, year",
-        status=400,
-        hint=["week", "month", "6months", "year"],
-    )
+    return api_err("Invalid period. Use: week, month, 6months, year", status=400, hint=["week", "month", "6months", "year"])   
 
 @api_bp.route("/top/artists/<period>")
 def top_artists(period: str):
