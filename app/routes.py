@@ -3,6 +3,7 @@ from app.services.spotify_client import get_spotify_client
 import os
 from flask import redirect, request
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy import Spotify
 from app.services.spotify_data import (
     get_recently_played,
     get_top_tracks,
@@ -25,6 +26,13 @@ def get_auth_manager():
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
         scope="user-read-email user-read-private user-read-recently-played user-top-read",
     )
+
+def get_sp_from_request() -> Spotify | None:
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "): # or len(auth_header.split(" ")) != 2:
+        return None
+    token = auth_header.split(" ", 1)[1]
+    return Spotify(auth=token)
 
 @api_bp.route("/login")
 def login():
