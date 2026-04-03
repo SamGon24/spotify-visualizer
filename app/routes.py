@@ -1,16 +1,13 @@
-from flask import Blueprint, jsonify
-from app.services.spotify_client import get_spotify_client
 import os
-from flask import redirect, request
-from spotipy.oauth2 import SpotifyOAuth
+from flask import Blueprint, jsonify, redirect, request
 from spotipy import Spotify
+from spotipy.oauth2 import SpotifyOAuth
 from app.services.spotify_data import (
     get_recently_played,
     get_top_tracks,
-    get_top_tracks_last_7_days, get_top_artists, 
-    get_top_artists_last_7_days,
+    get_top_tracks_last_7_days,
     get_top_artists,
-    get_top_artists_last_7_days
+    get_top_artists_last_7_days,
 )
 
 api_bp = Blueprint("api", __name__)
