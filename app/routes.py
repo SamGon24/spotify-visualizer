@@ -1,5 +1,8 @@
 from flask import Blueprint, jsonify
 from app.services.spotify_client import get_spotify_client
+import os
+from flask import redirect, request
+from spotipy.oauth2 import SpotifyOAuth
 from app.services.spotify_data import (
     get_recently_played,
     get_top_tracks,
@@ -10,6 +13,30 @@ from app.services.spotify_data import (
 )
 
 api_bp = Blueprint("api", __name__)
+
+# -----------------------------
+# Authentication routes
+# -----------------------------
+
+def get_auth_manager():
+    return SpotifyOAuth(
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+        redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
+        scope="user-read-email user-read-private user-read-recently-played user-top-read",
+    )
+
+@api_bp.route("/login")
+def login():
+    auth_url = get_auth_manager().get_authorize_url()
+    return redirect(auth_url)
+
+@api_bp.route("/callback")
+def callback():
+    code = request.args.get("code")
+    token_info = get_auth_manager().get_access_token(code)
+    access_token = token_info["access_token"]
+    return redirect(f"http://localhost:5173?token={access_token}")
 
 # -----------------------------
 # Helpers: standard API responses
