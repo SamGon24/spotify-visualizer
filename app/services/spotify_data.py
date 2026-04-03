@@ -15,6 +15,7 @@ def get_recently_played(sp, limit: int = 10) -> list[dict[str, Any]]:
             "name": t.get("name"),
             "artists": [a.get("name") for a in t.get("artists", [])],
             "album": (t.get("album") or {}).get("name"),
+            "image": ((t.get("album") or {}).get("images") or [{}])[0].get("url"),
             "played_at": it.get("played_at"),
             "external_url": (t.get("external_urls") or {}).get("spotify"),
         })
@@ -35,6 +36,7 @@ def get_top_tracks(sp, time_range: str, limit: int = 10) -> list[dict[str, Any]]
             "name": t.get("name"),
             "artists": [a.get("name") for a in t.get("artists", [])],
             "album": (t.get("album") or {}).get("name"),
+            "image": ((t.get("album") or {}).get("images") or [{}])[0].get("url"),
             "popularity": t.get("popularity"),
             "external_url": (t.get("external_urls") or {}).get("spotify"),
         }
@@ -71,6 +73,7 @@ def get_top_tracks_last_7_days(sp, limit: int = 10, recent_limit: int = 50) -> l
                 "name": track.get("name"),
                 "artists": [a.get("name") for a in track.get("artists", [])],
                 "album": (track.get("album") or {}).get("name"),
+                "image": ((track.get("album") or {}).get("images") or [{}])[0].get("url"),
                 "external_url": (track.get("external_urls") or {}).get("spotify"),
             }
 
@@ -101,7 +104,7 @@ def get_top_artists(sp, time_range: str, limit: int = 10) -> list[dict[str, Any]
             "popularity": a.get("popularity"),
             "followers": (a.get("followers") or {}).get("total"),
             "external_url": (a.get("external_urls") or {}).get("spotify"),
-            "images": a.get("images", []),  # list of {url,height,width}
+            "images": a.get("images", []),
         }
         for a in items
     ]
