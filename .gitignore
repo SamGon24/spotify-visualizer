@@ -1,3 +1,19 @@
-.env # Environment variables
+/.env # Environment variables
 .cache/ # Cache files
 .token* # Token files
+.env
+.venv
+.spotipy_cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+*.db
+*.bak
+*.tmp
+.DS_Store
+.spotify_cache
+.cache
+frontend/node_modules
