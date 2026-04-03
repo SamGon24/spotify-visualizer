@@ -1,0 +1,81 @@
+@startuml Spotify-Visualizer-DataFlow
+
+!define USER_COLOR #FFD700
+!define SPOTIFY_COLOR #1DB954
+!define FRONTEND_COLOR #FFE0B2
+!define BACKEND_COLOR #C8E6C9
+
+skinparam backgroundColor #FAFAFA
+skinparam defaultFontColor #333333
+skinparam sequenceLifelineBackgroundColor #E1F5FE
+
+title Spotify Visualizer - Authentication & Data Flow
+
+actor User
+participant "Browser\n(React Frontend)" as Frontend <<FRONTEND_COLOR>>
+participant "Flask Backend\nAPI" as Backend <<BACKEND_COLOR>>
+participant "Spotify OAuth\nServer" as Spotify <<SPOTIFY_COLOR>>
+
+== Authentication Flow ==
+
+User -> Frontend: Clicks "Login with Spotify"
+Frontend -> Backend: GET /login
+Backend -> Spotify: Redirect to OAuth consent screen
+Spotify -> User: Shows login & permission page
+User -> Spotify: Approves access
+Spotify -> Backend: Redirect to /callback with auth code
+Backend -> Spotify: Exchange code for access token
+Spotify -> Backend: Returns access token
+Backend -> Frontend: Redirect with token in URL\n(http://localhost:5173?token=...)
+Frontend -> Frontend: Extracts token from URL\nStores in state
+
+== Data Fetching Flow ==
+
+Frontend -> Frontend: User selects tab\n(Recent/Top Tracks/Top Artists)
+Frontend -> Backend: GET /recent\nHeaders: Authorization: Bearer {token}
+Backend -> Spotify: Use token to fetch user's recently played
+Spotify -> Backend: Returns track data
+Backend -> Frontend: JSON response with tracks
+Frontend -> Frontend: Renders tracks in UI
+
+== Component Hierarchy ==
+
+App.jsx: Main component\n- Manages token state\n- Handles authentication\n- Manages active tab
+├── Header: Displays user info
+├── Tabs: Navigation between views
+└── Page Component (selected):
+    ├── RecentlyPlayed.jsx
+    │   └── TrackList: Displays tracks
+    ├── TopTracks.jsx
+    │   ├── PeriodPills: Period selector\n    │   └── TrackList: Displays tracks
+    └── TopArtists.jsx
+        ├── PeriodPills: Period selector
+        └── ArtistList: Displays artists
+
+== Backend API Endpoints ==
+
+GET /login
+  └─> Initiates OAuth flow
+
+GET /callback?code=...
+  └─> Handles OAuth callback
+
+GET /user
+  Header: Authorization: Bearer {token}
+  └─> Returns user profile data
+
+GET /recent
+  Header: Authorization: Bearer {token}
+  └─> Returns recently played tracks
+
+GET /top/tracks/<period>
+  Header: Authorization: Bearer {token}
+  Periods: week, month, 6months, year
+  └─> Returns top tracks for period
+
+GET /top/artists/<period>
+  Header: Authorization: Bearer {token}
+  Periods: week, month, 6months, year
+  └─> Returns top artists for period
+
+@enduml
