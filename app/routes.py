@@ -88,7 +88,9 @@ def home():
 
 @api_bp.route("/user")
 def user_info():
-    sp = get_spotify_client()
+    sp = get_sp_from_request()
+    if not sp:
+        return api_err("Missing or invalid token", status=401)
     me = sp.current_user()
 
     user_data = {
