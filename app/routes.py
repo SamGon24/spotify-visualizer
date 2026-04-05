@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Blueprint, jsonify, redirect, request
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
@@ -11,37 +12,67 @@ from app.services.spotify_data import (
 )
 
 api_bp = Blueprint("api", __name__)
+logger = logging.getLogger(__name__)
 
 # -----------------------------
 # Authentication routes
 # -----------------------------
 
 def get_auth_manager():
+    client_id = os.getenv("SPOTIPY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+    redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
+    
+    logger.debug(f"🔐 Auth Manager Config - Client ID: {client_id[:10]}..., Redirect URI: {redirect_uri}")
+    
     return SpotifyOAuth(
-        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
         scope="user-read-email user-read-private user-read-recently-played user-top-read",
     )
 
 def get_sp_from_request() -> Spotify | None:
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "): # or len(auth_header.split(" ")) != 2:
+        logger.warning(f"⚠️  Missing or invalid Authorization header: {auth_header[:20] if auth_header else 'empty'}")
         return None
     token = auth_header.split(" ", 1)[1]
+    logger.debug(f"✅ Valid Bearer token found")
     return Spotify(auth=token)
 
 @api_bp.route("/login")
 def login():
-    auth_url = get_auth_manager().get_authorize_url()
-    return redirect(auth_url)
+    logger.info("🔑 /login endpoint called")
+    try:
+        auth_url = get_auth_manager().get_authorize_url()
+        logger.info(f"✅ Authorization URL generated: {auth_url[:50]}...")
+        return redirect(auth_url)
+    except Exception as e:
+        logger.error(f"❌ Error in /login: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @api_bp.route("/callback")
 def callback():
-    code = request.args.get("code")
-    token_info = get_auth_manager().get_access_token(code)
-    access_token = token_info["access_token"]
-    return redirect(f"http://localhost:5173?token={access_token}")
+    logger.info("🔄 /callback endpoint called")
+    try:
+        code = request.args.get("code")
+        logger.info(f"📝 Authorization code received: {code[:20] if code else 'None'}...")
+        
+        if not code:
+            logger.error("❌ No authorization code in callback")
+            return jsonify({"error": "No code provided"}), 400
+        
+        token_info = get_auth_manager().get_access_token(code)
+        access_token = token_info["access_token"]
+        logger.info(f"✅ Access token obtained: {access_token[:20]}...")
+        
+        redirect_url = f"http://localhost:5173?token={access_token}"
+        logger.info(f"🔀 Redirecting to: {redirect_url[:50]}...")
+        return redirect(redirect_url)
+    except Exception as e:
+        logger.error(f"❌ Error in /callback: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # -----------------------------
 # Helpers: standard API responses
@@ -88,22 +119,30 @@ def home():
 
 @api_bp.route("/user")
 def user_info():
+    logger.info("👤 /user endpoint called")
     sp = get_sp_from_request()
     if not sp:
+        logger.warning("❌ /user: No valid token provided")
         return api_err("Missing or invalid token", status=401)
-    me = sp.current_user()
+    
+    try:
+        me = sp.current_user()
+        logger.info(f"✅ /user: User info retrieved: {me.get('display_name')}")
 
-    user_data = {
-        "display_name": me.get("display_name"),
-        "id": me.get("id"),
-        "country": me.get("country"),
-        "product": me.get("product"),
-    }
+        user_data = {
+            "display_name": me.get("display_name"),
+            "id": me.get("id"),
+            "country": me.get("country"),
+            "product": me.get("product"),
+        }
 
-    return api_ok(
-        data=user_data,
-        endpoint="/user",
-    )
+        return api_ok(
+            data=user_data,
+            endpoint="/user",
+        )
+    except Exception as e:
+        logger.error(f"❌ /user: Error retrieving user info: {str(e)}")
+        return api_err(f"Error retrieving user info: {str(e)}", status=500)
 
 
 @api_bp.route("/recent")

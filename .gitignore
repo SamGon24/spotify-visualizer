@@ -17,3 +17,5 @@ __pycache__/
 .spotify_cache
 .cache
 frontend/node_modules
+frontend/dist
+frontend/build  
