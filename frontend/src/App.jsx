@@ -6,6 +6,8 @@ import RecentlyPlayed from './pages/RecentlyPlayed'
 import TopTracks from './pages/TopTracks'
 import TopArtists from './pages/TopArtists'
 import { fetchUser } from './api/spotify'
+import Charts from './pages/Charts'
+
 
 function App() {
   const [token, setToken] = useState(null)
@@ -83,6 +85,7 @@ function App() {
             {activeTab === 'recent' && <RecentlyPlayed token={token} />}
             {activeTab === 'tracks' && <TopTracks token={token} />}
             {activeTab === 'artists' && <TopArtists token={token} />}
+            {activeTab === 'charts' && <Charts token={token} />} 
           </>
         )}
       </div>

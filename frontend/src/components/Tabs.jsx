@@ -2,6 +2,7 @@ const TABS = [
   { label: "Recently played", value: "recent" },
   { label: "Top tracks", value: "tracks" },
   { label: "Top artists", value: "artists" },
+  { label: "Charts", value: "charts" },
 ]
 
 export default function Tabs({ activeTab, setActiveTab }) {
