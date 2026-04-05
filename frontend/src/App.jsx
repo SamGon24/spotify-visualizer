@@ -47,7 +47,7 @@ function App() {
           <div className="app-header">
             <h1>🎵 Spotify Visualizer</h1>
             <p>Visualize your Spotify listening habits</p>
-            <a href="http://localhost:5000/login" style={{ marginTop: '20px', display: 'inline-block' }}>
+            <a href="http://127.0.0.1:5000/login" style={{ marginTop: '20px', display: 'inline-block' }}>
               <button style={{
                 padding: '12px 30px',
                 fontSize: '1em',
