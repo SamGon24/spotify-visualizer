@@ -13,7 +13,11 @@ def create_app() -> Flask:
     logger.info("🚀 Creating Flask app...")
 
     # Enable CORS for frontend communication
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}})
+    CORS(app, resources={r"/*": {"origins": [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ]}})
     logger.info("✅ CORS enabled for localhost:5173 and localhost:3000")
 
     app.register_blueprint(api_bp)
