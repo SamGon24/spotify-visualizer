@@ -15,7 +15,6 @@ function App() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Get token from URL query params
     const params = new URLSearchParams(window.location.search)
     const urlToken = params.get('token')
     if (urlToken) {
@@ -23,6 +22,11 @@ function App() {
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
+
+  const handleLogout = () => {
+    setToken(null)
+    setUser(null)
+  }
 
   useEffect(() => {
     if (token) {
@@ -69,7 +73,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header user={user} />
+      <Header user={user} onLogout={handleLogout} />
       <div className="container">
         {error && <div className="error">{error}</div>}
         {loading && <div className="loading">Loading...</div>}
