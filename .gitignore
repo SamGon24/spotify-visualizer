@@ -18,4 +18,5 @@ __pycache__/
 .cache
 frontend/node_modules
 frontend/dist
-frontend/build  
+frontend/build
+frontend/.env
