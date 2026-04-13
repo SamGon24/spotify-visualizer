@@ -67,7 +67,8 @@ def callback():
         access_token = token_info["access_token"]
         logger.info(f"✅ Access token obtained: {access_token[:20]}...")
         
-        redirect_url = f"http://localhost:5173?token={access_token}"
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+        redirect_url = f"{frontend_url}?token={access_token}"
         logger.info(f"🔀 Redirecting to: {redirect_url[:50]}...")
         return redirect(redirect_url)
     except Exception as e:
