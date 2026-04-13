@@ -19,13 +19,31 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const urlToken = params.get('token')
+    const urlRefresh = params.get('refresh')
+    const urlExpiresIn = params.get('expires_in')
+
     if (urlToken) {
+      const expiry = Date.now() + Number(urlExpiresIn || 3600) * 1000
+      localStorage.setItem('spotify_token', urlToken)
+      localStorage.setItem('spotify_refresh', urlRefresh || '')
+      localStorage.setItem('spotify_expiry', String(expiry))
       setToken(urlToken)
       window.history.replaceState({}, document.title, window.location.pathname)
+      return
+    }
+
+    // Restore session from localStorage if token hasn't expired
+    const storedToken = localStorage.getItem('spotify_token')
+    const storedExpiry = Number(localStorage.getItem('spotify_expiry') || 0)
+    if (storedToken && Date.now() < storedExpiry) {
+      setToken(storedToken)
     }
   }, [])
 
   const handleLogout = () => {
+    localStorage.removeItem('spotify_token')
+    localStorage.removeItem('spotify_refresh')
+    localStorage.removeItem('spotify_expiry')
     setToken(null)
     setUser(null)
   }
@@ -53,7 +71,7 @@ function App() {
           <div className="app-header">
             <h1>🎵 Spotify Visualizer</h1>
             <p>Visualize your Spotify listening habits</p>
-            <a href="http://127.0.0.1:5000/login" style={{ marginTop: '20px', display: 'inline-block' }}>
+            <a href={`${import.meta.env.VITE_API_URL}/login`} style={{ marginTop: '20px', display: 'inline-block' }}>
               <button style={{
                 padding: '12px 30px',
                 fontSize: '1em',

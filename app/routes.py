@@ -65,10 +65,12 @@ def callback():
         
         token_info = get_auth_manager().get_access_token(code)
         access_token = token_info["access_token"]
+        refresh_token = token_info.get("refresh_token", "")
+        expires_in = token_info.get("expires_in", 3600)
         logger.info(f"✅ Access token obtained: {access_token[:20]}...")
-        
+
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-        redirect_url = f"{frontend_url}?token={access_token}"
+        redirect_url = f"{frontend_url}?token={access_token}&refresh={refresh_token}&expires_in={expires_in}"
         logger.info(f"🔀 Redirecting to: {redirect_url[:50]}...")
         return redirect(redirect_url)
     except Exception as e:
@@ -109,6 +111,24 @@ def api_err(message: str, status: int = 400, hint=None):
 # -----------------------------
 # Routes
 # -----------------------------
+
+@api_bp.route("/refresh")
+def refresh_token():
+    logger.info("🔄 /refresh endpoint called")
+    refresh_token = request.args.get("refresh_token")
+    if not refresh_token:
+        return api_err("Missing refresh_token parameter", status=400)
+    try:
+        token_info = get_auth_manager().refresh_access_token(refresh_token)
+        return jsonify({
+            "ok": True,
+            "access_token": token_info["access_token"],
+            "expires_in": token_info.get("expires_in", 3600),
+        })
+    except Exception as e:
+        logger.error(f"❌ /refresh: {str(e)}")
+        return api_err("Failed to refresh token", status=401)
+
 
 @api_bp.route("/")
 def home():
