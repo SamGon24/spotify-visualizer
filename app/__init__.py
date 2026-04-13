@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 import logging
@@ -9,12 +10,13 @@ def create_app() -> Flask:
     # Setup logging
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(__name__)
-    
+
     logger.info("🚀 Creating Flask app...")
 
     # Enable CORS for frontend communication
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     CORS(app, resources={r"/*": {"origins": [
-        "http://localhost:5173",
+        frontend_url,
         "http://127.0.0.1:5173",
         "http://localhost:3000",
     ]}})
