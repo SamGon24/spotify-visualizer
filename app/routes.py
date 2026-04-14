@@ -3,6 +3,7 @@ import logging
 from flask import Blueprint, jsonify, redirect, request
 from spotipy import Spotify
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.cache_handler import MemoryCacheHandler
 from app.services.spotify_data import (
     get_recently_played,
     get_top_tracks,
@@ -30,6 +31,7 @@ def get_auth_manager():
         client_secret=client_secret,
         redirect_uri=redirect_uri,
         scope="user-read-email user-read-private user-read-recently-played user-top-read",
+        cache_handler=MemoryCacheHandler(),
     )
 
 def get_sp_from_request() -> Spotify | None:
